@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        target: [K64F, DISCO_L475VG_IOT01A, NRF52840_DK, NUCLEO_F303K8]
+        target: [K64F, NUCLEO_F103RB, NRF52840_DK, NUCLEO_F303K8]
         profile: [release, debug, develop]
         
 
