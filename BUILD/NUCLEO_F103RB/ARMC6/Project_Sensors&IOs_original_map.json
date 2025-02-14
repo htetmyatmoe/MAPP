@@ -13,12 +13,12 @@
     {
         "module": "Sensors&IOs.o",
         "size": {
-            ".text": 2857,
+            ".text": 2869,
             ".data": 89,
             ".bss": 789,
-            ".text-delta": -24,
+            ".text-delta": 12,
             ".data-delta": 0,
-            ".bss-delta": -4
+            ".bss-delta": 0
         }
     },
     {
@@ -90,10 +90,10 @@
     {
         "module": "mbed-os\\drivers",
         "size": {
-            ".text": 3771,
+            ".text": 5909,
             ".data": 0,
             ".bss": 8,
-            ".text-delta": 0,
+            ".text-delta": 2138,
             ".data-delta": 0,
             ".bss-delta": 0
         }
@@ -132,11 +132,22 @@
         }
     },
     {
+        "module": "wifi.o",
+        "size": {
+            ".text": 36,
+            ".data": 0,
+            ".bss": 796,
+            ".text-delta": 36,
+            ".data-delta": 0,
+            ".bss-delta": 796
+        }
+    },
+    {
         "summary": {
-            "static_ram": 6071,
-            "static_ram_delta": -4,
-            "total_flash": 34422,
-            "total_flash_delta": -24
+            "static_ram": 6867,
+            "static_ram_delta": 796,
+            "total_flash": 36608,
+            "total_flash_delta": 2186
         }
     }
 ]
