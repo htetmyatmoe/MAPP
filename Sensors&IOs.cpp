@@ -5,6 +5,7 @@
 #include "lcd.h"
 #include "mbed.h"
 #include <cstdio>
+#include "wifi.h"
 
 #define WAIT_TIME_MS_0 500
 #define WAIT_TIME_MS_1 1500
@@ -34,7 +35,7 @@ UnbufferedSerial serial(USBTX, USBRX, 9600);
 const float max_voltage = 5.5;
 const float max_distance_cm = 5.5;
 const float yellow_level = 3.0;
-const float red_level = 4.6;
+const float red_level = 4.5;
 
 unsigned int yellow_light = 0;
 unsigned int green_light = 0;
@@ -71,6 +72,12 @@ volatile int latestTemp = 0;
 volatile int latestHumidity = 0;
 volatile bool newDHTReading = false;
 volatile bool displayWaterLevelState = true;
+
+// Tracks if alert has already been sent for this flood event
+extern volatile bool floodAlertSent;  
+bool wasAboveRedLevel = false; 
+
+extern volatile bool allowMotorControl; // Access TCP motor control flag
 
 Ticker dhtTicker;
 Ticker buzzerTicker;
@@ -316,6 +323,8 @@ void moveServos(int targetPulseMotor1, int targetPulseMotor2) {
 int main() {
   lcd_init();
   lcd_Clear();
+    setupWiFi();
+
   buzzerTicker.attach(&toggleBuzzer, 100ms);
   dhtTicker.attach(&triggerDHTUpdate, 5s);
   displayTicker.attach(&switchDisplay, 5s);
@@ -345,6 +354,13 @@ int main() {
       lcd_write_cmd(0x01);
       setRGB(1, 0, 0);
       red_warning();
+
+      if (!wasAboveRedLevel) {  //  First time reaching red level
+                printf("Flood alert triggered!\n");
+                sendFloodAlert();  
+                wasAboveRedLevel = true;  // Set flag to prevent repeated alerts
+            }
+
 
       if (first_red_transition) {
         buzzer_suppressed = false;
@@ -386,6 +402,7 @@ int main() {
       was_red_level = false;
       was_green_level = false;
 
+
       if (!was_yellow_level) {
         buzzer_suppressed = false;
         was_yellow_level = true;
@@ -399,6 +416,8 @@ int main() {
       }
     }
 
+
+
     else {
       setRGB(0, 1, 0);
       serial.write("Green LED on\n", 12);
@@ -407,6 +426,7 @@ int main() {
       was_red_level = false;
       was_yellow_level = false;
       was_green_level = true; // Now in green level
+
 
       // If first time reaching green after a full cycle, reset
       // first_red_transition
@@ -422,6 +442,11 @@ int main() {
       }
 
       keypad_shown = false;
+
+       if (wasAboveRedLevel) {
+                    printf("Water level is back to normal. Resetting flood alert.\n");
+                    wasAboveRedLevel = false;  //  Reset the alert flag
+                }
 
       printf("PA_7 CCW to -100°, PA_6 CW to +100°\n");
       moveServos(PULSE_WIDTH_N_100_DEGREE, PULSE_WIDTH_100_DEGREE);
