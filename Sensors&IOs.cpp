@@ -4,14 +4,15 @@
 #include "keypad.h"
 #include "lcd.h"
 #include "mbed.h"
-#include <cstdio>
 #include "wifi.h"
+#include <cstdio>
+
 
 #define WAIT_TIME_MS_0 500
 #define WAIT_TIME_MS_1 1500
 #define DHT11_PIN PD_2
 
-#define PERIOD_WIDTH 20              // Servo motor period (20ms)
+#define PERIOD_WIDTH 40              // Servo motor period (20ms)
 #define PULSE_WIDTH_100_DEGREE 2055  // Move to +100 degrees (CW)
 #define PULSE_WIDTH_0_DEGREE 1500    // Middle position (0 degrees)
 #define PULSE_WIDTH_N_100_DEGREE 945 // Move to -100 degrees (CCW)
@@ -74,10 +75,11 @@ volatile bool newDHTReading = false;
 volatile bool displayWaterLevelState = true;
 
 // Tracks if alert has already been sent for this flood event
-extern volatile bool floodAlertSent;  
-bool wasAboveRedLevel = false; 
+extern volatile bool floodAlertSent;
+bool wasAboveRedLevel = false;
 
-extern volatile bool allowMotorControl; // Access TCP motor control flag
+ bool barrierIsOpen = false;
+ bool barrierIsClosed = false;
 
 Ticker dhtTicker;
 Ticker buzzerTicker;
@@ -323,7 +325,7 @@ void moveServos(int targetPulseMotor1, int targetPulseMotor2) {
 int main() {
   lcd_init();
   lcd_Clear();
-    setupWiFi();
+  setupWiFi();
 
   buzzerTicker.attach(&toggleBuzzer, 100ms);
   dhtTicker.attach(&triggerDHTUpdate, 5s);
@@ -355,12 +357,11 @@ int main() {
       setRGB(1, 0, 0);
       red_warning();
 
-      if (!wasAboveRedLevel) {  //  First time reaching red level
-                printf("Flood alert triggered!\n");
-                sendFloodAlert();  
-                wasAboveRedLevel = true;  // Set flag to prevent repeated alerts
-            }
-
+      if (!wasAboveRedLevel) { //  First time reaching red level
+        printf("Flood alert triggered!\n");
+        sendFloodAlert();
+        wasAboveRedLevel = true; // Set flag to prevent repeated alerts
+      }
 
       if (first_red_transition) {
         buzzer_suppressed = false;
@@ -402,21 +403,25 @@ int main() {
       was_red_level = false;
       was_green_level = false;
 
-
       if (!was_yellow_level) {
         buzzer_suppressed = false;
         was_yellow_level = true;
       }
 
+     if (!barrierIsClosed) {  // only send the alert ONCE when barrier closes
+    sendBarrierStatus("Barrier closed for safety\n");
+    printf("Alert Sent: Barrier Closed for Safety\n");
+    barrierIsClosed = true;
+    barrierIsOpen = false;  // Reset open state
+}
+
       while (yellow_light < 1) {
-          for(int i = 0 ; i <5 ; i++){
-        MidTone_MidPitch();
-        yellow_light++;
-      }
+        for (int i = 0; i < 5; i++) {
+          MidTone_MidPitch();
+          yellow_light++;
+        }
       }
     }
-
-
 
     else {
       setRGB(0, 1, 0);
@@ -426,7 +431,6 @@ int main() {
       was_red_level = false;
       was_yellow_level = false;
       was_green_level = true; // Now in green level
-
 
       // If first time reaching green after a full cycle, reset
       // first_red_transition
@@ -443,13 +447,21 @@ int main() {
 
       keypad_shown = false;
 
-       if (wasAboveRedLevel) {
-                    printf("Water level is back to normal. Resetting flood alert.\n");
-                    wasAboveRedLevel = false;  //  Reset the alert flag
-                }
+      if (wasAboveRedLevel) {
+        printf("Water level is back to normal. Resetting flood alert.\n");
+        wasAboveRedLevel = false; //  Reset the alert flag
+      }
 
       printf("PA_7 CCW to -100°, PA_6 CW to +100°\n");
       moveServos(PULSE_WIDTH_N_100_DEGREE, PULSE_WIDTH_100_DEGREE);
+
+     if (!barrierIsOpen) {  //  Only send the alert ONCE when barrier opens
+    sendBarrierStatus("Barrier opened\n");
+    printf("Alert Sent: Barrier Opened\n");
+    barrierIsOpen = true;
+    barrierIsClosed = false;  // Reset close state
+}
+        
 
       if (displayWaterLevelState) {
         displayWaterLevel();
@@ -461,4 +473,3 @@ int main() {
     }
   }
 }
-

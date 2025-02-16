@@ -197,4 +197,4 @@ BUILD\NUCLEO_F103RB\ARMC6\Sensors&IOs.o: Sensors&IOs.cpp \
   mbed-os\platform\include\platform\mbed_stats.h \
   mbed-os\platform\include\platform\Stream.h \
   mbed-os\platform\include\platform\FileLike.h \
-  mbed-os\platform\include\platform\FileBase.h keypad.h lcd.h
+  mbed-os\platform\include\platform\FileBase.h keypad.h lcd.h wifi.h

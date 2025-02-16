@@ -13,9 +13,9 @@
     {
         "module": "Sensors&IOs.o",
         "size": {
-            ".text": 2869,
+            ".text": 3001,
             ".data": 89,
-            ".bss": 789,
+            ".bss": 790,
             ".text-delta": 0,
             ".data-delta": 0,
             ".bss-delta": 0
@@ -35,7 +35,7 @@
     {
         "module": "[lib]\\mc_w.l",
         "size": {
-            ".text": 3378,
+            ".text": 3466,
             ".data": 12,
             ".bss": 40,
             ".text-delta": 0,
@@ -134,9 +134,9 @@
     {
         "module": "wifi.o",
         "size": {
-            ".text": 36,
+            ".text": 1470,
             ".data": 0,
-            ".bss": 796,
+            ".bss": 1308,
             ".text-delta": 0,
             ".data-delta": 0,
             ".bss-delta": 0
@@ -144,9 +144,9 @@
     },
     {
         "summary": {
-            "static_ram": 6867,
+            "static_ram": 7380,
             "static_ram_delta": 0,
-            "total_flash": 36608,
+            "total_flash": 38262,
             "total_flash_delta": 0
         }
     }

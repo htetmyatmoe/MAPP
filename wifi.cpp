@@ -128,3 +128,49 @@ void sendFloodAlert() {
     printf(" Flood Alert Sent Successfully!\n");
 }
 
+void sendBarrierStatus(const char *statusMessage) {
+    printf("Checking Server Connection for Barrier Status...\n");
+
+    // Request connection status
+    snprintf(wifi_bufTx, sizeof(wifi_bufTx), "AT+CIPSTATUS\r\n");
+    wifi_serial.write(wifi_bufTx, strlen(wifi_bufTx));
+    thread_sleep_for(500);
+
+    // Read response
+    memset(wifi_bufRx, 0, sizeof(wifi_bufRx));
+    int bytesRead = wifi_serial.read(wifi_bufRx, sizeof(wifi_bufRx) - 1);
+    wifi_bufRx[bytesRead] = '\0';
+
+    printf("ESP8266 Status Response: %s\n", wifi_bufRx);
+
+    // Check if no client is connected
+    if (strstr(wifi_bufRx, "STATUS:4") != NULL) {
+        printf(" No TCP client connected. Barrier Status NOT sent.\n");
+        return;
+    }
+
+    printf(" TCP Client Connected. Sending Barrier Status...\n");
+
+    // Calculate actual message length
+    int messageLength = strlen(statusMessage);
+
+    // Send AT+CIPSEND with the correct length
+    snprintf(wifi_bufTx, sizeof(wifi_bufTx), "AT+CIPSEND=0,%d\r\n", messageLength);
+    wifi_serial.write(wifi_bufTx, strlen(wifi_bufTx));
+    thread_sleep_for(500);
+
+    // Wait for confirmation before sending the message
+    memset(wifi_bufRx, 0, sizeof(wifi_bufRx));
+    wifi_serial.read(wifi_bufRx, sizeof(wifi_bufRx));
+    printf("ESP Response: %s\n", wifi_bufRx);
+
+    // Send the actual barrier status message
+    wifi_serial.write(statusMessage, messageLength);
+    thread_sleep_for(1000);
+
+    memset(wifi_bufRx, 0, sizeof(wifi_bufRx));
+    wifi_serial.read(wifi_bufRx, sizeof(wifi_bufRx));
+    printf("Reply from ESP01: %s\n", wifi_bufRx);
+
+    printf("Barrier Status Sent Successfully!\n");
+}
