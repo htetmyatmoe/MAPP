@@ -1,146 +1,77 @@
-![](./resources/official_armmbed_example_badge.png)
-# Bare metal blinky Mbed OS example
-
-This example shows how to achieve memory optimizations in Mbed OS. Starting with a blinky application, the example illustrates how to enable the bare metal profile and further memory optimizations.
-
-You can build this project with all supported [Mbed OS build tools](https://os.mbed.com/docs/mbed-os/latest/tools/index.html). However, this example project specifically refers to the command-line interface tool [Arm Mbed CLI](https://github.com/ARMmbed/mbed-cli#installing-mbed-cli).
-
-1. Install Mbed CLI.
-1. From the command-line, import the example: `mbed import mbed-os-example-blinky-baremetal`
-1. Change the current directory to where the project was imported.
-
-## Application functionality
-
-The `main()` function toggles the state of a digital output connected to an LED on the board.
-
-## Building and running
-
-1. Connect a USB cable between the USB port on the target and the host computer.
-1. Run the following command to build the example project, program the microcontroller flash memory, and open a serial terminal:
-
-   ```
-   $ mbed compile -m <TARGET> -t <TOOLCHAIN> --flash --sterm
-   ```
+# Smart Gate System for Flooding
+This project is an IoT-based flood monitoring and alert system using STM32 and Mbed OS. It detects water levels, displays real-time data on an LCD, and activates a servo-based gate system when flooding occurs.
 
 
-Your PC may take a few minutes to compile your code.
+## Features
+- Water level detection using a water level sensor
+- Real-time display of temperature and humidity on an LCD
+- Automatic gate control with two servo motors
+- RGB light according to the flooding condition 
+- Buzzer tone according to the flooding condition
+- KeyPad password to stop the buzzer at red water level
+- Remote monitoring via WiFi communication
 
-The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-blinky-baremetal.bin`.
+## Hardware Requirements
+- STM32 Nucleo-F103RB
+- Water level sensor llc4965
+- DHT11 Temperature and Humidity Sensor
+- Servo Motor (SG90)
+- 16x2 LCD Display with I2C Module
+- WiFi Module (ESP8266)
+- RGB 
+- Buzzer
 
-Alternatively, you can manually copy the binary to the target, which gets mounted on the host computer through USB.
+## Software Requirements
+- Mbed Studio or Keil uVision
+- Mbed OS
+- CMake (for build configuration)
 
-Depending on the target, you can build the example project with the `GCC_ARM`, `ARM` or `IAR` toolchain. After installing Arm Mbed CLI, run the command below to determine which toolchain supports your target:
 
-```
-$ mbed compile -S
-```
+## Installation & Setup
+Clone the repository:
+```sh
+git clone https://github.com/htetmyatmoe/MAPP.git
+cd MAPP
 
-## Expected output 
+mbed config root .
+mbed deploy
 
-The LED on your target turns on and off every 500 milliseconds, and the serial terminal shows an output similar to: 
+mbed compile -t GCC_ARM -m NUCLEO_F103RB
 
-```
---- Terminal on /dev/tty.usbmodem21102 - 9600,8,N,1 ---
-This is the bare metal blinky example running on Mbed OS 99.99.99.
-``` 
 
-## Configuring the application
+---
 
-### The bare metal profile
+### **5. Usage**
+- Provide instructions on how to use the project.
 
-The bare metal profile is a configuration of Mbed OS that excludes the RTOS, as well as other features. We designed it specifically for ultraconstrained devices because it gives you more control over the system. For more details, please see [the bare metal documentation](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html)
+**Example:**
+```md
+## Usage
+1. Power on the system.
+2. Monitor real-time water levels and temperature on the LCD.
+3. If flooding is detected, the gate will automatically open.
+4. RGB and Buzzer trigger according to water level
+5. Data is sent to a remote monitoring system via WiFi.
 
-To build with the bare metal profile, the application configuration file must contain:
+## Project Structure
+MAPP/
+│-- src/
+│   ├── dht11_utilities.cpp  # Reads temperature & humidity
+│   ├── keypad_utilities.cpp  # Handles user input
+│   ├── lcd_utilities.cpp  # Manages LCD display
+│   ├── wifi.cpp  # Handles WiFi communication
+│-- include/
+│   ├── dht11_utilities.h
+│   ├── lcd_utilities.h
+│-- tests/
+│   ├── test_water_level.cpp  # Test cases for water level detection
+│-- CMakeLists.txt  # CMake build configuration
+│-- README.md  # Project documentation
+│-- LICENSE  # Apache-2.0 License
 
-```json
-{
-    "requires": ["bare-metal"]
-}
-```
 
-### Futher optimizations
-Some of the configurations shown below are already set by default in `targets/targets.json` and `platform/mbed_lib.json`.
-#### Linking with smaller C libraries
+## Contact
+- Developer: Htet Myat Moe
+- Email: htetmyatmoe@example.com
+- GitHub: [htetmyatmoe](https://github.com/htetmyatmoe)
 
-Both the `ARM` and `GCC_ARM` toolchains support optimized versions of their C standard libraries, microlib and newlib-nano. We recommend using them with the bare metal profile.
-
-To build with the smaller C libraries, modify the application configuration file:
-
-```json
-{
-    "target_overrides": {
-        "*": {
-            "target.c_lib": "small"
-        }
-    }
-}
-```
-
-The build system reverts to the standard C library if support for the small C library is not enabled for your target. You can find more information [here]( https://github.com/ARMmbed/mbed-os-5-docs/blob/development/docs/program-setup/bare_metal/c_small_libs.md).
-
-#### Using Mbed minimal printf library
-
-Mbed OS offers a smaller `printf()` alternative. The [minimal printf](https://github.com/ARMmbed/mbed-os/blob/master/platform/source/minimal-printf/README.md) library implements a subset of the `v/s/f/printf` function family, and you can disable floating points to further reduce code size.
-
-To build with the minimal printf library and disable floating points printing, you need to modify the application configuration file:
-
-```json
-{
-    "target_overrides": {
-        "*": {
-            "target.printf_lib": "minimal-printf",
-            "platform.minimal-printf-enable-floating-point": false
-        }
-    }
-}
-```
-
-Further optimizations are possible. For more details, please see the minimal printf README.
-
-#### Using a minimal console
-
-If your application only needs unbuffered I/O operations, you can save additional memory by using a configuration of the platform library, which removes file handling functionality from the [system I/O retarget code](https://github.com/ARMmbed/mbed-os/blob/master/platform/source/mbed_retarget.cpp).
-
-To build with the minimal console functionality, modify the application configuration file:
-
-```json
-{
-    "target_overrides": {
-        "*": {
-            "platform.stdio-minimal-console-only": true
-        }
-    }
-}
-```
-
-#### Memory comparison
-
-The below table shows the result for the blinky bare metal application compiled with the release profile on K64F for the GCC_ARM toolchain.
-
-The baseline configuration used is the blinky bare metal application built with the standard C library.
-
-Mbed OS release: mbed-os-6.0.0-alpha-2
-
-|Standard C lib|Small C lib|Minimal printf|Minimal console|RAM|Flash|
-| :---:        | :---:     | :---:        | :---:         | :---: | :---: |
-| X            |           |              |               | 0 | 0 |
-|              | X         |              |               | -2,592 | -28,581 |
-|              | X         | X            |               | -2,592 | -29,918 |
-|              | X         | X            | X             | -2,592 | -30,810 |
-
-## Troubleshooting 
-
-If you have problems, you can review the [documentation](https://os.mbed.com/docs/latest/tutorials/debugging.html) for suggestions on what could be wrong and how to fix it. 
-
-## Related links 
-
-- [Mbed OS bare metal](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html).
-- [Mbed OS configuration](https://os.mbed.com/docs/latest/reference/configuration.html). 
-- [Mbed OS serial communication](https://os.mbed.com/docs/latest/tutorials/serial-communication.html). 
-- [Mbed boards](https://os.mbed.com/platforms/).
-
-### License and contributions
-
-The software is provided under the Apache-2.0 license. Contributions to this project are accepted under the same license. Please see [contributing.md](./CONTRIBUTING.md) for more information.
-
-This project contains code from other projects. The original license text is included in those source files. They must comply with our license guide.
