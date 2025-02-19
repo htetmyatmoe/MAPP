@@ -71,7 +71,7 @@ MAPP/
 
 
 ## Contact
-- Developer: Htet Myat Moe
+- Developer: Htet Myat Moe, Ooi Zi Xian, Ravinash S Kunalan
 - Email: htetmyatmoe@example.com
 - GitHub: [htetmyatmoe](https://github.com/htetmyatmoe)
 
