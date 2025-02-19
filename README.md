@@ -56,22 +56,26 @@ mbed compile -t GCC_ARM -m NUCLEO_F103RB
 ## Project Structure
 MAPP/
 │-- src/
-│   ├── dht11_utilities.cpp  # Reads temperature & humidity
-│   ├── keypad_utilities.cpp  # Handles user input
-│   ├── lcd_utilities.cpp  # Manages LCD display
-│   ├── wifi.cpp  # Handles WiFi communication
+│   ├── dht11_utilities.cpp  # Reads temperature & humidity from the DHT11 sensor
+│   ├── keypad_utilities.cpp  # Handles user input via a capacitive touch keypad
+│   ├── lcd_utilities.cpp  # Controls the 16x2 LCD display using the I2C module
+│   ├── wifi.cpp  # Manages WiFi communication for remote monitoring
+│   ├── Sensors_IOs.cpp  # Integrates sensor inputs (ultrasonic, DHT11) and handles outputs
 │-- include/
-│   ├── dht11_utilities.h
-│   ├── lcd_utilities.h
-│-- tests/
-│   ├── test_water_level.cpp  # Test cases for water level detection
-│-- CMakeLists.txt  # CMake build configuration
-│-- README.md  # Project documentation
-│-- LICENSE  # Apache-2.0 License
+│   ├── dht11_utilities.h  # Header file for DHT11 sensor functions
+│   ├── lcd_utilities.h  # Header file for LCD display functions
+│   ├── keypad_utilities.h  # Header file for keypad input functions
+│   ├── wifi.h  # Header file for WiFi communication functions
+│-- CMakeLists.txt  # CMake build configuration for compiling the project
+│-- mbed_app.json  # Configuration file for Mbed OS settings and target board
+│-- README.md  # Project documentation and setup instructions
+│-- LICENSE  # Apache-2.0 License defining usage terms
+│-- .github/ISSUE_TEMPLATE/  # GitHub issue reporting templates
+
 
 
 ## Contact
 - Developer: Htet Myat Moe, Ooi Zi Xian, Ravinash S Kunalan
-- Email: htetmyatmoe@example.com
+- Email: htetmyatmoe2311@gmail.com
 - GitHub: [htetmyatmoe](https://github.com/htetmyatmoe)
 
